@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+</head>
+<body>
+    <div id="root">
+        <nav class="black">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">EXAM</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <form id="form" style="width: 40%; margin: auto">
+        <input id="query" placeholder="Symbol" type="text" required>
+        <button id="nameBtn">Find Name</button>
+        <button id="priceBtn">Find Price</button>
+    </form>
+    <div id="value" style="width: 40%; margin: auto"></div>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        let root = document.getElementById("root")
+        let form = document.getElementById("form")
+        let symbol = document.getElementById("query")
+        let nameBtn = document.getElementById("nameBtn")
+        let priceBtn = document.getElementById("priceBtn")
+        let value = document.getElementById("value")
+        window.onload = function() {
+            axios.get("http://localhost:3000/api/v1/stocks")
+                .then((res) => {
+                    if (res.data.length == 0) {
+                        root.innerHTML += "<h1>Stock empty</h1>"
+                    } else {
+                        renderData(res.data)
+                    }
+                });
+
+            nameBtn.onclick = (e) => {
+                e.preventDefault()
+                if (symbol.value.length == 0) {
+                    return
+                }
+
+                axios.get(`http://localhost:3000/api/v1/stocks/${symbol.value}/name`)
+                    .then(res => {
+                        value.innerHTML = res.data;
+                    })
+            }
+            priceBtn.onclick = (e) => {
+                e.preventDefault()
+                if (symbol.value.length == 0) {
+                    return
+                }
+
+                axios.get(`http://localhost:3000/api/v1/stocks/${symbol.value}/price`)
+                    .then(res => {
+                        value.innerHTML = res.data;
+                    }).catch(err => value.innerHTML = "Invalid symbol")
+            }
+        }
+
+        function renderData(data) {
+            let html = ""
+            html += "<table style='width: 40%; margin: auto'>"
+            html += "<thead>"
+            html += "<tr>"
+            html += "<th>Symbol</th>"
+            html += "<th>Name</th>"
+            html += "<th>Price</th>"
+            html += "</tr>"
+            html += "</thead>"
+            html += "<tbody>"
+
+            data.forEach(item => {
+                html += "<tr>"
+                html += `<td>${item.symbol}</td>`
+                html += `<td>${item.name}</td>`
+                html += `<td>${item.price}</td>`
+                html += "</tr>"
+            })
+
+            html += "</tbody>"
+            html += "</table>"
+
+            root.innerHTML += html
+        }
+    </script>
+</body>
+</html>
